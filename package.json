@@ -1,0 +1,16 @@
+{
+  "name": "omniboard",
+  "version": "1.0.0",
+  "description": "omnidoarb",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=config.env index.js"
+  },
+  "author": "thecolor_bluu",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "discord.js": "^14.27.0",
+    "emoji-name-map": "^2.0.3"
+  }
+}
