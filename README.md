@@ -4,6 +4,8 @@ omniboard will post starboard-like posts for ANY emoji reaction (yes including s
 
 # Setup
 - First, copy `config.env.example` as `config.env` and fill in the information it requests
+- Second, in your Discord developer portal view, add the bot to your server via the link and give it **Manage Channels, Manage Roles, Add Reactions, and Send Messages** (you do not need Manage Roles if your boards aren't restricted, however)
+- Third, under the Bot tab of the portal, enable **Message Content** for the bot
 - Finally, run `npm run start` to start the bot and it should begin to work
 
 # Config
