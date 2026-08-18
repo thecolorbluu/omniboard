@@ -1,6 +1,6 @@
-const { Colors, ChannelType, ContainerBuilder, TextDisplayBuilder, FileBuilder, MessageFlags, MediaGalleryItemBuilder, MediaGalleryBuilder } = require('discord.js');
+const { Colors, ChannelType, ContainerBuilder, TextDisplayBuilder, FileBuilder, MessageFlags, MediaGalleryItemBuilder, MediaGalleryBuilder, PermissionFlagsBits } = require('discord.js');
 const db = require('./db.js');
-const { threshold, boardCategoryID } = process.env;
+const { threshold, boardCategoryID, closedBoards } = process.env;
 
 const getColors = db.db.prepare(`
   SELECT colors FROM emojiBoards
@@ -17,6 +17,7 @@ function buildContainer(message, count, emoji, reaction, serverEmoji, newChannel
         .setContent(message.content || "*No content*")
     );
   const files = [];
+  
   message.attachments.values().forEach(att => {
     files.push({
       attachment: att.url,
@@ -25,6 +26,7 @@ function buildContainer(message, count, emoji, reaction, serverEmoji, newChannel
     });
   });
   const mGallery = new MediaGalleryBuilder();
+
   files.forEach(att => {
     if (att.contentType?.startsWith("image/")) {
       mGallery.addItems(new MediaGalleryItemBuilder().setURL(`attachment://${att.name}`));
@@ -33,6 +35,7 @@ function buildContainer(message, count, emoji, reaction, serverEmoji, newChannel
     }
   });
   if (mGallery.items.length) boardContainer.addMediaGalleryComponents(mGallery);
+
   const colors = JSON.parse(getColors.get(newChannel.id).colors);
   const thisColor = colors[Math.floor(Math.random() * colors.length)];
   boardContainer.setAccentColor(thisColor);
@@ -51,6 +54,33 @@ async function postMessage(message, reaction, serverEmoji, count, emoji, client)
       type: ChannelType.GuildText,
       parent: boardCategoryID
     });
+
+    if (closedBoards == "true") {
+      const botRole = guild.roles.cache.find(role => role.tags?.botId === client.user.id);
+      await newChannel.permissionOverwrites.set([
+        {
+          id: guild.roles.everyone.id,
+          deny: [
+            PermissionFlagsBits.SendMessages,
+            PermissionFlagsBits.UseApplicationCommands,
+            PermissionFlagsBits.CreatePublicThreads,
+            PermissionFlagsBits.CreatePrivateThreads,
+            PermissionFlagsBits.SendPolls
+          ]
+        },
+        {
+          id: botRole.id, // love how discord will let the bot remove its own permissions from a channel ❤️‍🩹
+          allow: [
+            PermissionFlagsBits.SendMessages,
+            PermissionFlagsBits.UseApplicationCommands,
+            PermissionFlagsBits.CreatePublicThreads,
+            PermissionFlagsBits.CreatePrivateThreads,
+            PermissionFlagsBits.SendPolls
+          ]
+        }
+      ]);
+    }
+
     db.createBoard.run(reaction, newChannel.id, JSON.stringify([0xff88dd, 0x99ffbb, 0xffdd99, 0x2244bb], null, 0))
   } else {
     newChannel = db.getBoard.get(reaction).channelID;
