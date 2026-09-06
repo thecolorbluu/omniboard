@@ -4,7 +4,8 @@
   "description": "omnidoarb",
   "main": "index.js",
   "scripts": {
-    "start": "node --env-file-if-exists=config.env index.js"
+    "start": "node --env-file-if-exists=config.env index.js",
+    "sync": "node --env-file-if-exists=config.env sync.js"
   },
   "author": "thecolor_bluu",
   "type": "commonjs",

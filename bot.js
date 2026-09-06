@@ -1,13 +1,12 @@
-const { Client, REST, GatewayIntentBits, Events, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Events, Partials } = require('discord.js');
 const emojiNameMap = require('emoji-name-map');
-
 const emojiToName = Object.fromEntries(
   Object.entries(emojiNameMap.emoji).map(([name, emoji]) => [emoji, name])
 );
 
 const { token } = process.env;
 const postMessage = require('./starboard.js');
-const rest = new REST({ version: '10' }).setToken(token);
+const { runCommand } = require('./commands/commands.js');
 
 const eventQueue = [];
 let processingQueue = false;
@@ -71,6 +70,10 @@ client.on(Events.MessageReactionAdd, (reaction, user) => {
 
 client.on(Events.MessageReactionRemove, (reaction, user) => {
   queueReaction(reaction, user);
+});
+
+client.on(Events.InteractionCreate, (interaction) => {
+  runCommand(interaction);
 });
 
 client.login(token);

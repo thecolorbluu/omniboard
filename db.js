@@ -18,6 +18,31 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS ignoredChannels (
+    channelID TEXT PRIMARY KEY
+  )
+`);
+
+const disableChannel = db.prepare(`
+  INSERT OR IGNORE INTO ignoredChannels (channelID)
+  VALUES (?)
+`);
+
+const enableChannel = db.prepare(`
+  DELETE FROM ignoredChannels
+  WHERE channelID = ?
+`);
+
+const getChannel = db.prepare(`
+  SELECT channelID FROM ignoredChannels
+  WHERE channelID = ?
+`);
+
+function channelDisabled(channelId) {
+  return !!getChannel.get(channelId)?.channelID;
+}
+
 const createBoard = db.prepare(`
   INSERT INTO emojiBoards (emoji, channelID, colors)
   VALUES (?, ?, ?)
@@ -58,6 +83,7 @@ function messageExists(messageID, channelID) {
 
 module.exports = {
   db,
+  disableChannel, enableChannel, channelDisabled,
   createBoard, removeBoard,
   addMessage, removeMessage,
   getBoard, boardExists,

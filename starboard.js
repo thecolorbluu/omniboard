@@ -1,4 +1,9 @@
-const { Colors, ChannelType, ContainerBuilder, TextDisplayBuilder, FileBuilder, MessageFlags, MediaGalleryItemBuilder, MediaGalleryBuilder, PermissionFlagsBits } = require('discord.js');
+const {
+  ChannelType, ContainerBuilder,
+  TextDisplayBuilder, FileBuilder,
+  MessageFlags, MediaGalleryItemBuilder,
+  MediaGalleryBuilder, PermissionFlagsBits
+} = require('discord.js');
 const db = require('./db.js');
 const { threshold, boardCategoryID, closedBoards } = process.env;
 
@@ -45,6 +50,8 @@ function buildContainer(message, count, emoji, reaction, serverEmoji, newChannel
 async function postMessage(message, reaction, serverEmoji, count, emoji, client) {
   if (count < threshold) return;
   if (db.messageExists(message.id, reaction) || message.author.bot) return;
+  if (db.channelDisabled(message.channelId)) return;
+
   const guild = await message.guild.fetch();
   let newChannel;
 
